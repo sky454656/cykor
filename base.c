@@ -21,6 +21,8 @@
     ========================================================================
 */
 #include <stdio.h>
+#include <stdarg.h>
+#include <string.h>
 #define STACK_SIZE 50 // 최대 스택 크기
 
 int     call_stack[STACK_SIZE];         // Call Stack을 저장하는 배열
@@ -40,6 +42,9 @@ int FP = -1;
 void func1(int arg1, int arg2, int arg3);
 void func2(int arg1, int arg2);
 void func3(int arg1);
+
+void stack_frame_creation(int args, ...);
+//void stack_frame_delection(int args, ...);
 
 /*  
     현재 call_stack 전체를 출력합니다.
@@ -78,6 +83,7 @@ void func1(int arg1, int arg2, int arg3)
 {
     int var_1 = 100;
 
+    stack_frame_creation(5, 3, arg3, arg2, arg1, var_1);
     // func1의 스택 프레임 형성 (함수 프롤로그 + push)
     print_stack();
     func2(11, 13);
@@ -90,6 +96,7 @@ void func2(int arg1, int arg2)
 {
     int var_2 = 200;
 
+    stack_frame_creation(4, 2, arg2, arg1, var_2);
     // func2의 스택 프레임 형성 (함수 프롤로그 + push)
     print_stack();
     func3(77);
@@ -103,6 +110,7 @@ void func3(int arg1)
     int var_3 = 300;
     int var_4 = 400;
 
+    stack_frame_creation(4, 1, arg1, var_3, var_4);
     // func3의 스택 프레임 형성 (함수 프롤로그 + push)
     print_stack();
 }
@@ -116,3 +124,66 @@ int main()
     print_stack();
     return 0;
 }
+
+
+void stack_frame_creation(int args, ...)
+{
+    va_list ap;
+
+    va_start(ap, args);
+    int num_of_arg = va_arg(ap, int);
+    int before_FP = FP;
+
+    FP = SP + num_of_arg + 2;
+
+    for (int i = 0; i < num_of_arg; i++)
+    {
+        SP++;
+        call_stack[SP] = va_arg(ap, int);
+        strcpy(stack_info[SP], "arg");
+        stack_info[SP][3] = '0' + (num_of_arg - i);
+        stack_info[SP][4] = '\0';
+    }
+    SP++;
+    call_stack[SP] = -1;
+    strcpy(stack_info[SP], "Return Address");
+
+    SP++;
+    call_stack[SP] = before_FP;
+
+    int var_idx;
+    if (num_of_arg == 3)
+    {
+        strcpy(stack_info[SP], "fun1 SFP");
+        var_idx = 1;
+    }
+    else if (num_of_arg == 2)
+    {
+        strcpy(stack_info[SP], "fun2 SFP");
+        var_idx = 2;
+    }
+    else
+    {
+        strcpy(stack_info[SP], "fun3 SFP");
+        var_idx = 3;
+    }
+
+    for (int i = 0; i < args - num_of_arg -1; i++)
+    {
+        SP++;
+        call_stack[SP] = va_arg(ap, int);
+        strcpy(stack_info[SP], "var_");
+        stack_info[SP][4] = '0' + (var_idx + i);
+        stack_info[SP][5] = '\0';
+    }
+
+    va_end(ap);
+}
+
+
+
+
+
+//void stack_frame_delection(int args, ...)
+//{
+//}
