@@ -135,7 +135,8 @@ void stack_frame_creation(int args, ...)
 
     va_start(ap, args);
     int num_of_arg = va_arg(ap, int);
-    int before_FP = FP;
+    int current_FP = FP;
+    int num_of_local_var = args - 1 - num_of_arg;
 
     FP = SP + num_of_arg + 2;
 
@@ -156,9 +157,10 @@ void stack_frame_creation(int args, ...)
 
     //SFP PUSH
     SP++;
-    call_stack[SP] = before_FP;
+    call_stack[SP] = current_FP;
 
     int var_idx;
+    //함수마다 인자의 개수가 다르므로, 이를 이용해 어떤 함수의 SFP인지 확인인
     if (num_of_arg == 3)
     {
         strcpy(stack_info[SP], "fun1 SFP");
@@ -178,13 +180,13 @@ void stack_frame_creation(int args, ...)
 
     //지역변수 PUSH
     // 실제 메모리 작동처럼 지역변수 전체 크기에 맞게 SP를 새로 설정하도록 수정해야함.
-    for (int i = 0; i < args - num_of_arg -1; i++)
+    SP += num_of_local_var;
+    for (int i = FP + 1; i < SP; i++)
     {
-        SP++;
-        call_stack[SP] = va_arg(ap, int);
-        strcpy(stack_info[SP], "var_");
-        stack_info[SP][4] = '0' + (var_idx + i);
-        stack_info[SP][5] = '\0';
+        call_stack[i] = va_arg(ap, int);
+        strcpy(stack_info[i], "var_");
+        stack_info[i][4] = '0' + (var_idx + i);
+        stack_info[i][5] = '\0';
     }
 
     va_end(ap);
@@ -192,34 +194,15 @@ void stack_frame_creation(int args, ...)
 
 void stack_frame_delection(int num_of_arg)
 {
-    //지역변수 pop
-    //값을 초기화할지, 메모리에 그대로 남겨두고 ESP 값만 변경할지를 고민..
-    for (int i = SP; i > FP; i--)
-    {
-        call_stack[i] = 0;
-        memset(stack_info[i], 0, sizeof(stack_info[i]));
-    }
-
     // SFP 복원
     SP = FP;
     FP = call_stack[FP];
+    SP--;
 
-    //SFP && RET 정리
-    for (int i = 0; i < 2; i++)
-    {
-        call_stack[SP] = 0;
-        memset(stack_info[SP], 0, sizeof(stack_info[i]));
-        SP--;
-    }
+    //RET pop
+    SP--;
 
     //매개변수 정리
-    //이것 역시 pop을 해야되는지 안해도 되는지 확인
-    for (int i = SP; i > SP - num_of_arg; i--)
-    {
-        call_stack[i] = 0;
-        memset(stack_info[i], 0, sizeof(stack_info[i]));
-    }
-
-    SP = SP - num_of_arg;
+    SP -= num_of_arg;
 
 }
