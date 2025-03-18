@@ -44,7 +44,7 @@ void func2(int arg1, int arg2);
 void func3(int arg1);
 
 void stack_frame_creation(int args, ...);
-//void stack_frame_delection(int args, ...);
+void stack_frame_delection(int num_of_arg);
 
 /*  
     현재 call_stack 전체를 출력합니다.
@@ -87,6 +87,7 @@ void func1(int arg1, int arg2, int arg3)
     // func1의 스택 프레임 형성 (함수 프롤로그 + push)
     print_stack();
     func2(11, 13);
+    stack_frame_delection(2);
     // func2의 스택 프레임 제거 (함수 에필로그 + pop)
     print_stack();
 }
@@ -100,6 +101,7 @@ void func2(int arg1, int arg2)
     // func2의 스택 프레임 형성 (함수 프롤로그 + push)
     print_stack();
     func3(77);
+    stack_frame_delection(1);
     // func3의 스택 프레임 제거 (함수 에필로그 + pop)
     print_stack();
 }
@@ -120,6 +122,7 @@ void func3(int arg1)
 int main()
 {
     func1(1, 2, 3);
+    stack_frame_delection(3);
     // func1의 스택 프레임 제거 (함수 에필로그 + pop)
     print_stack();
     return 0;
@@ -136,6 +139,7 @@ void stack_frame_creation(int args, ...)
 
     FP = SP + num_of_arg + 2;
 
+    //매개변수 PUSH
     for (int i = 0; i < num_of_arg; i++)
     {
         SP++;
@@ -144,10 +148,13 @@ void stack_frame_creation(int args, ...)
         stack_info[SP][3] = '0' + (num_of_arg - i);
         stack_info[SP][4] = '\0';
     }
+
+    //RET PUSH
     SP++;
     call_stack[SP] = -1;
     strcpy(stack_info[SP], "Return Address");
 
+    //SFP PUSH
     SP++;
     call_stack[SP] = before_FP;
 
@@ -168,6 +175,9 @@ void stack_frame_creation(int args, ...)
         var_idx = 3;
     }
 
+
+    //지역변수 PUSH
+    // 실제 메모리 작동처럼 지역변수 전체 크기에 맞게 SP를 새로 설정하도록 수정해야함.
     for (int i = 0; i < args - num_of_arg -1; i++)
     {
         SP++;
@@ -180,10 +190,36 @@ void stack_frame_creation(int args, ...)
     va_end(ap);
 }
 
+void stack_frame_delection(int num_of_arg)
+{
+    //지역변수 pop
+    //값을 초기화할지, 메모리에 그대로 남겨두고 ESP 값만 변경할지를 고민..
+    for (int i = SP; i > FP; i--)
+    {
+        call_stack[i] = 0;
+        memset(stack_info[i], 0, sizeof(stack_info[i]));
+    }
 
+    // SFP 복원
+    SP = FP;
+    FP = call_stack[FP];
 
+    //SFP && RET 정리
+    for (int i = 0; i < 2; i++)
+    {
+        call_stack[SP] = 0;
+        memset(stack_info[SP], 0, sizeof(stack_info[i]));
+        SP--;
+    }
 
+    //매개변수 정리
+    //이것 역시 pop을 해야되는지 안해도 되는지 확인
+    for (int i = SP; i > SP - num_of_arg; i--)
+    {
+        call_stack[i] = 0;
+        memset(stack_info[i], 0, sizeof(stack_info[i]));
+    }
 
-//void stack_frame_delection(int args, ...)
-//{
-//}
+    SP = SP - num_of_arg;
+
+}
