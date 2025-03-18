@@ -163,17 +163,17 @@ void stack_frame_creation(int args, ...)
     //함수마다 인자의 개수가 다르므로, 이를 이용해 어떤 함수의 SFP인지 확인인
     if (num_of_arg == 3)
     {
-        strcpy(stack_info[SP], "fun1 SFP");
+        strcpy(stack_info[SP], "func1 SFP");
         var_idx = 1;
     }
     else if (num_of_arg == 2)
     {
-        strcpy(stack_info[SP], "fun2 SFP");
+        strcpy(stack_info[SP], "func2 SFP");
         var_idx = 2;
     }
     else
     {
-        strcpy(stack_info[SP], "fun3 SFP");
+        strcpy(stack_info[SP], "func3 SFP");
         var_idx = 3;
     }
 
@@ -181,11 +181,11 @@ void stack_frame_creation(int args, ...)
     //지역변수 PUSH
     // 실제 메모리 작동처럼 지역변수 전체 크기에 맞게 SP를 새로 설정하도록 수정해야함.
     SP += num_of_local_var;
-    for (int i = FP + 1; i < SP; i++)
+    for (int i = FP + 1; i <= SP; i++)
     {
         call_stack[i] = va_arg(ap, int);
         strcpy(stack_info[i], "var_");
-        stack_info[i][4] = '0' + (var_idx + i);
+        stack_info[i][4] = '0' + (var_idx + i - FP - 1);
         stack_info[i][5] = '\0';
     }
 
