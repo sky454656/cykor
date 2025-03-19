@@ -84,11 +84,9 @@ void func1(int arg1, int arg2, int arg3)
     int var_1 = 100;
 
     stack_frame_creation(5, 3, arg3, arg2, arg1, var_1);
-    // func1의 스택 프레임 형성 (함수 프롤로그 + push)
     print_stack();
     func2(11, 13);
     stack_frame_delection(2);
-    // func2의 스택 프레임 제거 (함수 에필로그 + pop)
     print_stack();
 }
 
@@ -98,11 +96,9 @@ void func2(int arg1, int arg2)
     int var_2 = 200;
 
     stack_frame_creation(4, 2, arg2, arg1, var_2);
-    // func2의 스택 프레임 형성 (함수 프롤로그 + push)
     print_stack();
     func3(77);
     stack_frame_delection(1);
-    // func3의 스택 프레임 제거 (함수 에필로그 + pop)
     print_stack();
 }
 
@@ -113,7 +109,6 @@ void func3(int arg1)
     int var_4 = 400;
 
     stack_frame_creation(4, 1, arg1, var_3, var_4);
-    // func3의 스택 프레임 형성 (함수 프롤로그 + push)
     print_stack();
 }
 
@@ -123,7 +118,6 @@ int main()
 {
     func1(1, 2, 3);
     stack_frame_delection(3);
-    // func1의 스택 프레임 제거 (함수 에필로그 + pop)
     print_stack();
     return 0;
 }
@@ -178,7 +172,7 @@ void stack_frame_creation(int args, ...)
     FP = SP;
 
     //지역변수 PUSH
-    // 실제 메모리 작동처럼 지역변수 전체 크기에 맞게 SP를 새로 설정하도록 수정해야함.
+    // 실제 메모리 작동처럼 지역변수 전체 크기에 맞게 SP를 새로 설정.
     SP += num_of_local_var;
     for (int i = FP + 1; i <= SP; i++)
     {
@@ -203,5 +197,4 @@ void stack_frame_delection(int num_of_arg)
 
     //매개변수 정리
     SP -= num_of_arg;
-
 }
