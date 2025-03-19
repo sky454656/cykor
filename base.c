@@ -138,8 +138,6 @@ void stack_frame_creation(int args, ...)
     int current_FP = FP;
     int num_of_local_var = args - 1 - num_of_arg;
 
-    FP = SP + num_of_arg + 2;
-
     //매개변수 PUSH
     for (int i = 0; i < num_of_arg; i++)
     {
@@ -149,6 +147,7 @@ void stack_frame_creation(int args, ...)
         stack_info[SP][3] = '0' + (num_of_arg - i);
         stack_info[SP][4] = '\0';
     }
+
 
     //RET PUSH
     SP++;
@@ -160,7 +159,7 @@ void stack_frame_creation(int args, ...)
     call_stack[SP] = current_FP;
 
     int var_idx;
-    //함수마다 인자의 개수가 다르므로, 이를 이용해 어떤 함수의 SFP인지 확인인
+    //함수마다 인자의 개수가 다르므로, 이를 이용해 어떤 함수의 SFP인지 확인
     if (num_of_arg == 3)
     {
         strcpy(stack_info[SP], "func1 SFP");
@@ -177,6 +176,7 @@ void stack_frame_creation(int args, ...)
         var_idx = 3;
     }
 
+    FP = SP;
 
     //지역변수 PUSH
     // 실제 메모리 작동처럼 지역변수 전체 크기에 맞게 SP를 새로 설정하도록 수정해야함.
