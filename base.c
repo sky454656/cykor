@@ -135,7 +135,6 @@ void stack_frame_creation(int args, ...)
 
     va_start(ap, args);
     int num_of_arg = va_arg(ap, int);
-    int current_FP = FP;
     int num_of_local_var = args - 1 - num_of_arg;
 
     //매개변수 PUSH
@@ -156,7 +155,7 @@ void stack_frame_creation(int args, ...)
 
     //SFP PUSH
     SP++;
-    call_stack[SP] = current_FP;
+    call_stack[SP] = FP;
 
     int var_idx;
     //함수마다 인자의 개수가 다르므로, 이를 이용해 어떤 함수의 SFP인지 확인
